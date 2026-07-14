@@ -1,0 +1,39 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>キャリコン単語帳</title>
+<style>
+body{font-family:sans-serif;max-width:800px;margin:auto;padding:15px;background:#f5f5f5}
+.box{background:#fff;padding:15px;border-radius:10px}
+textarea,input{width:100%;margin:6px 0;padding:8px}
+button{padding:10px;margin:4px}
+pre{white-space:pre-wrap}
+</style></head><body><div class="box">
+<h2>キャリコン単語帳</h2>
+<button onclick="mode='all';current=0;draw()">通常</button>
+<button onclick="mode='wrong';current=0;draw()">❌だけ復習</button>
+<input id="search" placeholder="検索" oninput="draw()">
+<hr>
+<pre id=q></pre>
+<button onclick="show()">答え</button>
+<button onclick="wrong()">❌間違えた</button>
+<button onclick="next()">次へ</button>
+<pre id=a></pre>
+<hr><h3>問題追加</h3>
+<textarea id=nq placeholder="問題"></textarea>
+<input id=na placeholder="答え">
+<textarea id=ne placeholder="解説"></textarea>
+<button onclick="add()">保存</button>
+</div>
+<script>
+let cards=JSON.parse(localStorage.cards||"[]");
+if(cards.length==0){cards=[{q:"スーパー理論で正しいものは？\n①RIASEC\n②自己概念",a:"②\nスーパーは自己概念",w:false}]}
+let current=0,mode="all";
+function save(){localStorage.cards=JSON.stringify(cards)}
+function list(){let s=search.value.toLowerCase();return cards.filter(c=>(mode=="all"||c.w)&&c.q.toLowerCase().includes(s))}
+function draw(){let l=list();if(l.length==0){q.textContent="問題なし";a.textContent="";return;}if(current>=l.length)current=0;q.textContent=l[current].q;a.textContent=""}
+function show(){let l=list();if(l.length)a.textContent=l[current].a}
+function next(){current++;draw()}
+function wrong(){let l=list();if(!l.length)return;let c=l[current];cards.find(x=>x.q==c.q).w=true;save();alert("登録")}
+function add(){if(!nq.value||!na.value)return alert("問題と答え");cards.push({q:nq.value,a:"【正解】\n"+na.value+"\n\n【解説】\n"+ne.value,w:false});save();nq.value=na.value=ne.value="";alert("保存しました");}
+draw();
+</script></body></html>
