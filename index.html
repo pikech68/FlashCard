@@ -1,46 +1,110 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8">
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>キャリコン単語帳</title>
 <style>
-body{font-family:sans-serif;max-width:800px;margin:auto;padding:20px;background:#f5f5f5}
-.box{background:#fff;padding:15px;border-radius:10px}
-textarea,input{width:100%;
-margin:10px 0;
-padding:12px;
-font-size:20px;}
-button{padding:8px;
-margin:4px;
-font-size:16px;}
-pre{white-space:pre-wrap;
-font-size:30px;
-line-height:1.6;}
-</style></head><body><div class="box">
-<h2>キャリコン単語帳</h2>
-<button onclick="mode='all';current=0;draw()">通常</button>
-<button onclick="mode='wrong';current=0;draw()">❌だけ復習</button>
-<input id="search" placeholder="検索" oninput="draw()">
-<hr>
-<pre id=q></pre>
-<button onclick="show()">答え</button>
-<button onclick="wrong()">❌間違えた</button>
-<button onclick="next()">次へ</button>
-<pre id=a></pre>
-<hr><h3>問題追加</h3>
-<textarea id=nq placeholder="問題"></textarea>
-<input id=na placeholder="答え">
-<textarea id=ne placeholder="解説"></textarea>
-<button onclick="add()">保存</button>
+*{box-sizing:border-box}
+body{margin:0;padding:12px;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#f3f4f6;color:#222}
+.app{max-width:820px;margin:auto;background:#fff;border-radius:14px;padding:16px;box-shadow:0 4px 18px rgba(0,0,0,.08)}
+h1{margin:0 0 12px;font-size:24px}
+.toolbar,.actions{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+button{padding:7px 10px;font-size:14px;border:1px solid #cfd4dc;border-radius:8px;background:#fff}
+#counter{font-size:14px;color:#666;margin:10px 0 6px}
+#question{white-space:pre-wrap;font-size:29px;line-height:1.65;margin:8px 0 16px;font-weight:600}
+#answer{white-space:pre-wrap;font-size:27px;line-height:1.65;margin:14px 0 8px;padding-top:12px;border-top:1px solid #ddd}
+#search,textarea,input{width:100%;margin:7px 0;padding:12px;font-size:19px;line-height:1.5;border:1px solid #cfd4dc;border-radius:8px}
+textarea{min-height:120px;resize:vertical}
+.section{margin-top:22px;padding-top:18px;border-top:2px solid #eee}
+.section h2{font-size:21px;margin:0 0 10px}
+#message{min-height:24px;margin-top:8px;font-size:15px;color:#256029}
+@media(max-width:480px){
+body{padding:8px}.app{padding:13px}
+#question{font-size:27px}
+#answer{font-size:25px}
+button{font-size:13px;padding:7px 9px}
+}
+</style>
+</head>
+<body>
+<main class="app">
+<h1>キャリコン単語帳</h1>
+<div class="toolbar">
+<button onclick="setMode('all')">通常</button>
+<button onclick="setMode('wrong')">✕だけ復習</button>
+<button onclick="shuffleCards()">ランダム</button>
 </div>
+<input id="search" placeholder="問題文を検索" oninput="resetAndDraw()">
+<div id="counter"></div>
+<div id="question"></div>
+<div class="actions">
+<button onclick="showAnswer()">答え</button>
+<button onclick="markWrong()">間違えた</button>
+<button onclick="nextQuestion()">次へ</button>
+</div>
+<div id="answer"></div>
+<section class="section">
+<h2>問題を追加</h2>
+<textarea id="newQuestion" placeholder="問題文と4つの選択肢を入力"></textarea>
+<input id="newAnswer" placeholder="正解（例：②）">
+<textarea id="newExplanation" placeholder="解説"></textarea>
+<button onclick="addCard()">保存</button>
+<div id="message"></div>
+</section>
+</main>
 <script>
-let cards=JSON.parse(localStorage.cards||"[]");
-if(cards.length==0){cards=[{q:"スーパー理論で正しいものは？\n①RIASEC\n②自己概念",a:"②\nスーパーは自己概念",w:false}]}
-let current=0,mode="all";
-function save(){localStorage.cards=JSON.stringify(cards)}
-function list(){let s=search.value.toLowerCase();return cards.filter(c=>(mode=="all"||c.w)&&c.q.toLowerCase().includes(s))}
-function draw(){let l=list();if(l.length==0){q.textContent="問題なし";a.textContent="";return;}if(current>=l.length)current=0;q.textContent=l[current].q;a.textContent=""}
-function show(){let l=list();if(l.length)a.textContent=l[current].a}
-function next(){current++;draw()}
-function wrong(){let l=list();if(!l.length)return;let c=l[current];cards.find(x=>x.q==c.q).w=true;save();alert("登録")}
-function add(){if(!nq.value||!na.value)return alert("問題と答え");cards.push({q:nq.value,a:"【正解】\n"+na.value+"\n\n【解説】\n"+ne.value,w:false});save();nq.value=na.value=ne.value="";alert("保存しました");}
+const KEY="careerCardsV2";
+let cards=JSON.parse(localStorage.getItem(KEY)||"[]");
+if(cards.length===0){
+cards=[{id:Date.now(),question:"スーパーの理論について正しいものはどれか。\n\n① 職業興味を6類型に分類した\n② 自己概念の発達を重視した\n③ 計画的偶発性を提唱した\n④ 欲求階層説を提唱した",answer:"②",explanation:"スーパーは、自己概念の発達を重視したキャリア発達理論を提唱した。",wrong:false}];
+save();
+}
+let current=0,mode="all",shuffled=false,order=[];
+function save(){localStorage.setItem(KEY,JSON.stringify(cards))}
+function filtered(){
+const k=document.getElementById("search").value.trim().toLowerCase();
+let r=cards.filter(c=>{
+const modeOK=mode==="all"||c.wrong;
+const text=(c.question+" "+c.answer+" "+c.explanation).toLowerCase();
+return modeOK&&(k===""||text.includes(k));
+});
+if(shuffled)r=order.map(id=>r.find(c=>c.id===id)).filter(Boolean);
+return r;
+}
+function draw(){
+const list=filtered();answer.textContent="";
+if(!list.length){counter.textContent="0問";question.textContent="該当する問題がありません。";return}
+if(current>=list.length)current=0;
+counter.textContent=`${current+1} / ${list.length}問${mode==="wrong"?"　✕だけ復習中":""}`;
+question.textContent=list[current].question;
+}
+function showAnswer(){
+const list=filtered();if(!list.length)return;
+const c=list[current];
+answer.textContent=`【正解】\n${c.answer}\n\n【解説】\n${c.explanation||"解説なし"}`;
+}
+function nextQuestion(){const list=filtered();if(!list.length)return;current=(current+1)%list.length;draw()}
+function markWrong(){
+const list=filtered();if(!list.length)return;
+const c=cards.find(x=>x.id===list[current].id);
+if(c){c.wrong=true;save();message.textContent="「間違えた問題」に登録しました。"}
+}
+function setMode(m){mode=m;current=0;shuffled=false;order=[];draw()}
+function shuffleCards(){
+const list=filtered();order=list.map(c=>c.id);
+for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]]}
+shuffled=true;current=0;draw();
+}
+function resetAndDraw(){current=0;shuffled=false;order=[];draw()}
+function addCard(){
+const q=newQuestion.value.trim(),a=newAnswer.value.trim(),e=newExplanation.value.trim();
+if(!q||!a){message.textContent="問題文と正解を入力してください。";return}
+cards.push({id:Date.now(),question:q,answer:a,explanation:e,wrong:false});
+save();newQuestion.value="";newAnswer.value="";newExplanation.value="";
+mode="all";shuffled=false;order=[];current=cards.length-1;message.textContent="保存しました。";draw();
+}
 draw();
-</script></body></html>
+</script>
+</body>
+</html>
