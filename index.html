@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#f3f4f6">
+<meta name="theme-color" content="#eaf0ff">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="キャリコン単語帳">
@@ -11,88 +11,351 @@
 <link rel="icon" href="./icon-192.png">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <title>キャリコン単語帳</title>
+
 <style>
+:root{
+  --bg:#f5f7fb;
+  --card:#ffffff;
+  --text:#20242c;
+  --sub:#687080;
+  --line:#dfe4ee;
+  --primary:#365ea8;
+  --primary-soft:#eaf0ff;
+  --danger:#b33a3a;
+  --danger-soft:#fff0f0;
+  --shadow:0 8px 24px rgba(25,42,70,.08);
+}
+
 *{box-sizing:border-box}
-body{margin:0;padding:10px;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#f3f4f6;color:#222}
-.app{max-width:860px;margin:auto;background:#fff;border-radius:14px;padding:15px;box-shadow:0 4px 18px rgba(0,0,0,.08)}
-h1{margin:0 0 12px;font-size:24px}
-.toolbar,.actions,.edit-actions{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
-button{padding:7px 10px;font-size:14px;border:1px solid #cfd4dc;border-radius:8px;background:#fff;cursor:pointer}
-button.danger{border-color:#d66;color:#a40000}
-button.primary{font-weight:700}
-#counter{font-size:14px;color:#666;margin:10px 0 6px}
-#question{white-space:pre-wrap;font-size:29px;line-height:1.65;margin:8px 0 16px;font-weight:600}
-#answer{white-space:pre-wrap;font-size:27px;line-height:1.65;margin:14px 0 8px;padding-top:12px;border-top:1px solid #ddd}
-#cardImage{display:none;max-width:100%;max-height:520px;object-fit:contain;border-radius:10px;margin:10px auto 16px}
-#search,textarea,input[type="text"]{width:100%;margin:7px 0;padding:12px;font-size:19px;line-height:1.5;border:1px solid #cfd4dc;border-radius:8px}
-textarea{min-height:120px;resize:vertical}
-.section{margin-top:22px;padding-top:18px;border-top:2px solid #eee}
-.section h2{font-size:21px;margin:0 0 10px}
-#message{min-height:24px;margin-top:8px;font-size:15px;color:#256029}
-.note{font-size:14px;color:#666;line-height:1.5;margin:5px 0}
-.photo-box{border:2px dashed #cfd4dc;border-radius:10px;padding:12px;margin:8px 0;background:#fafafa}
-#preview{display:none;max-width:100%;max-height:320px;object-fit:contain;border-radius:8px;margin:10px auto}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP",sans-serif;
+}
+
+.app{
+  width:min(100%,880px);
+  margin:0 auto;
+  padding:14px 12px 40px;
+}
+
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+h1{
+  margin:0;
+  font-size:23px;
+  letter-spacing:.02em;
+}
+
+.small-note{
+  color:var(--sub);
+  font-size:13px;
+}
+
+.panel{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:18px;
+  box-shadow:var(--shadow);
+}
+
+.controls{
+  padding:12px;
+  margin-bottom:12px;
+}
+
+.mode-row{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:7px;
+}
+
+button{
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:#fff;
+  color:var(--text);
+  font-size:14px;
+  padding:9px 10px;
+  cursor:pointer;
+}
+
+button:active{transform:translateY(1px)}
+
+button.primary{
+  background:var(--primary);
+  color:#fff;
+  border-color:var(--primary);
+  font-weight:700;
+}
+
+button.soft{
+  background:var(--primary-soft);
+  color:var(--primary);
+  border-color:#cbd8f3;
+}
+
+button.danger{
+  color:var(--danger);
+  background:var(--danger-soft);
+  border-color:#efcaca;
+}
+
+#search{
+  width:100%;
+  margin-top:9px;
+  padding:11px 12px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:#fff;
+  font-size:16px;
+}
+
+.study-card{
+  padding:17px 16px 15px;
+}
+
+.card-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+#counter{
+  color:var(--sub);
+  font-size:14px;
+}
+
+.status{
+  font-size:13px;
+  color:var(--primary);
+  font-weight:700;
+}
+
+#question{
+  white-space:pre-wrap;
+  font-size:25px;
+  line-height:1.65;
+  font-weight:650;
+  min-height:150px;
+  padding:8px 2px 4px;
+}
+
+#cardImage{
+  display:none;
+  width:100%;
+  max-height:470px;
+  object-fit:contain;
+  margin:8px 0 14px;
+  border-radius:12px;
+  background:#f8f9fc;
+  border:1px solid var(--line);
+}
+
+.main-actions{
+  display:grid;
+  grid-template-columns:1fr 1.25fr 1fr;
+  gap:8px;
+  margin-top:10px;
+}
+
+.main-actions button{
+  padding:11px 8px;
+  font-size:15px;
+}
+
+.secondary-actions{
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:10px;
+}
+
+#answer{
+  white-space:pre-wrap;
+  font-size:23px;
+  line-height:1.65;
+  margin-top:16px;
+  padding:16px 14px;
+  border-radius:12px;
+  background:#f7f9fd;
+  border:1px solid var(--line);
+}
+
+.add-wrap{
+  margin-top:14px;
+}
+
+summary{
+  list-style:none;
+  cursor:pointer;
+  padding:14px 16px;
+  font-weight:700;
+  font-size:17px;
+}
+
+summary::-webkit-details-marker{display:none}
+
+summary::after{
+  content:"＋";
+  float:right;
+  color:var(--primary);
+}
+
+details[open] summary::after{content:"－"}
+
+.form-body{
+  border-top:1px solid var(--line);
+  padding:14px 14px 16px;
+}
+
+textarea,
+input[type="text"]{
+  width:100%;
+  margin:7px 0;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  font-size:17px;
+  line-height:1.5;
+  background:#fff;
+}
+
+textarea{
+  min-height:112px;
+  resize:vertical;
+}
+
+.photo-box{
+  border:1px dashed #bfc8d8;
+  border-radius:12px;
+  padding:12px;
+  margin:10px 0;
+  background:#fafbfe;
+}
+
+#preview{
+  display:none;
+  width:100%;
+  max-height:300px;
+  object-fit:contain;
+  margin:10px 0;
+  border-radius:10px;
+}
+
+.form-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:8px;
+}
+
+#message{
+  min-height:22px;
+  margin-top:9px;
+  font-size:14px;
+  color:#256029;
+}
+
 .hidden{display:none!important}
-.mode-label{font-size:13px;color:#666;margin-left:4px}
-@media(max-width:480px){
-body{padding:7px}.app{padding:12px}
-#question{font-size:27px}
-#answer{font-size:25px}
-button{font-size:13px;padding:7px 9px}
+
+@media(max-width:520px){
+  .app{padding:8px 8px 28px}
+  .topbar{padding:4px 3px}
+  h1{font-size:21px}
+  .controls{padding:10px}
+  .study-card{padding:14px 13px}
+  #question{
+    font-size:23px;
+    line-height:1.62;
+    min-height:140px;
+  }
+  #answer{font-size:21px}
+  button{font-size:13px;padding:8px 8px}
+  .main-actions button{font-size:14px;padding:10px 6px}
 }
 </style>
 </head>
+
 <body>
 <main class="app">
-<h1>キャリコン単語帳</h1>
 
-<div class="toolbar">
-<button onclick="setMode('all')">通常</button>
-<button onclick="setMode('wrong')">✕だけ復習</button>
-<button onclick="shuffleCards()">ランダム</button>
-<span id="modeLabel" class="mode-label"></span>
-</div>
+  <div class="topbar">
+    <h1>キャリコン単語帳</h1>
+    <span class="small-note">自分専用</span>
+  </div>
 
-<input id="search" type="text" placeholder="問題・答え・解説を検索" oninput="resetAndDraw()">
+  <section class="panel controls">
+    <div class="mode-row">
+      <button id="allModeButton" class="soft" onclick="setMode('all')">通常</button>
+      <button id="wrongModeButton" onclick="setMode('wrong')">✕だけ復習</button>
+      <button onclick="shuffleCards()">ランダム</button>
+    </div>
+    <input id="search" type="text" placeholder="問題・答え・解説を検索" oninput="resetAndDraw()">
+  </section>
 
-<div id="counter"></div>
-<div id="question"></div>
-<img id="cardImage" alt="問題の写真">
+  <section class="panel study-card">
+    <div class="card-head">
+      <div id="counter"></div>
+      <div id="status" class="status"></div>
+    </div>
 
-<div class="actions">
-<button onclick="previousQuestion()">← 前へ</button>
-<button onclick="showAnswer()">答え</button>
-<button onclick="toggleWrong()">間違えた</button>
-<button onclick="nextQuestion()">次へ →</button>
-<button onclick="startEdit()">編集</button>
-<button class="danger" onclick="deleteCurrent()">削除</button>
-</div>
+    <div id="question"></div>
+    <img id="cardImage" alt="問題の写真">
 
-<div id="answer"></div>
+    <div class="main-actions">
+      <button onclick="previousQuestion()">← 前へ</button>
+      <button class="primary" onclick="showAnswer()">答えを見る</button>
+      <button onclick="nextQuestion()">次へ →</button>
+    </div>
 
-<section class="section">
-<h2 id="formTitle">問題を追加</h2>
+    <div class="secondary-actions">
+      <button id="wrongButton" class="soft" onclick="toggleWrong()">間違えた</button>
+      <button onclick="startEdit()">編集</button>
+      <button class="danger" onclick="deleteCurrent()">削除</button>
+    </div>
 
-<textarea id="newQuestion" placeholder="問題を入力"></textarea>
-<input id="newAnswer" type="text" placeholder="正解">
-<textarea id="newExplanation" placeholder="解説"></textarea>
+    <div id="answer" class="hidden"></div>
+  </section>
 
-<div class="photo-box" id="photoBox">
-<strong>写真（任意）</strong>
-<div class="note">「写真を選ぶ」か、この枠内をクリックしてから画像を貼り付けられます。</div>
-<input id="photoInput" type="file" accept="image/*">
-<img id="preview" alt="写真のプレビュー">
-<div class="edit-actions">
-<button type="button" onclick="removePhoto()">写真を外す</button>
-</div>
-</div>
+  <details id="editorPanel" class="panel add-wrap">
+    <summary id="formTitle">問題を追加</summary>
 
-<div class="edit-actions">
-<button id="saveButton" class="primary" onclick="saveCard()">保存</button>
-<button id="cancelButton" class="hidden" onclick="cancelEdit()">編集をやめる</button>
-</div>
-<div id="message"></div>
-</section>
+    <div class="form-body">
+      <textarea id="newQuestion" placeholder="問題を入力"></textarea>
+      <input id="newAnswer" type="text" placeholder="正解">
+      <textarea id="newExplanation" placeholder="解説"></textarea>
+
+      <div class="photo-box" id="photoBox" tabindex="0">
+        <strong>写真（任意）</strong>
+        <div class="small-note">写真を選ぶか、PCではこの枠に画像を貼り付けられます。</div>
+        <input id="photoInput" type="file" accept="image/*">
+        <img id="preview" alt="写真のプレビュー">
+        <div class="form-actions">
+          <button type="button" onclick="removePhoto()">写真を外す</button>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button id="saveButton" class="primary" onclick="saveCard()">保存</button>
+        <button id="cancelButton" class="hidden" onclick="cancelEdit()">編集をやめる</button>
+      </div>
+
+      <div id="message"></div>
+    </div>
+  </details>
+
 </main>
 
 <script>
@@ -150,11 +413,15 @@ function filtered() {
 
 function draw() {
   const list = filtered();
+  $("answer").classList.add("hidden");
   $("answer").textContent = "";
-  $("modeLabel").textContent = mode === "wrong" ? "✕だけ復習中" : "";
+
+  $("allModeButton").className = mode === "all" ? "soft" : "";
+  $("wrongModeButton").className = mode === "wrong" ? "soft" : "";
 
   if (!list.length) {
     $("counter").textContent = "0問";
+    $("status").textContent = "";
     $("question").textContent = "該当する問題がありません。";
     $("cardImage").style.display = "none";
     return;
@@ -163,7 +430,9 @@ function draw() {
   if (current >= list.length) current = 0;
   const card = list[current];
 
-  $("counter").textContent = `${current + 1} / ${list.length}問${card.wrong ? "　✕登録済み" : ""}`;
+  $("counter").textContent = `${current + 1} / ${list.length}問`;
+  $("status").textContent = card.wrong ? "✕ 復習対象" : "";
+  $("wrongButton").textContent = card.wrong ? "✕を解除" : "間違えた";
   $("question").textContent = card.question;
 
   if (card.image) {
@@ -180,6 +449,7 @@ function showAnswer() {
   if (!list.length) return;
   const card = list[current];
   $("answer").textContent = `【正解】\n${card.answer}\n\n【解説】\n${card.explanation || "解説なし"}`;
+  $("answer").classList.remove("hidden");
 }
 
 function previousQuestion() {
@@ -199,6 +469,7 @@ function nextQuestion() {
 function toggleWrong() {
   const list = filtered();
   if (!list.length) return;
+
   const original = cards.find(c => c.id === list[current].id);
   if (!original) return;
 
@@ -223,10 +494,12 @@ function setMode(newMode) {
 function shuffleCards() {
   const list = filtered();
   order = list.map(c => c.id);
+
   for (let i = order.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [order[i], order[j]] = [order[j], order[i]];
   }
+
   shuffled = true;
   current = 0;
   draw();
@@ -254,13 +527,13 @@ function startEdit() {
   pendingImage = card.image || "";
   updatePreview();
 
-  $("newQuestion").scrollIntoView({ behavior: "smooth", block: "start" });
-  $("newQuestion").focus();
+  $("editorPanel").open = true;
+  $("editorPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+  setTimeout(() => $("newQuestion").focus(), 300);
 }
 
 function cancelEdit() {
   editingId = null;
-  pendingImage = "";
   $("formTitle").textContent = "問題を追加";
   $("saveButton").textContent = "保存";
   $("cancelButton").classList.add("hidden");
@@ -290,7 +563,7 @@ function saveCard() {
   try {
     if (editingId !== null) {
       const card = cards.find(c => c.id === editingId);
-      if (!card) throw new Error("編集する問題が見つかりません。");
+      if (!card) throw new Error();
 
       card.question = question;
       card.answer = answer;
@@ -304,15 +577,15 @@ function saveCard() {
       $("cancelButton").classList.add("hidden");
       $("message").textContent = "変更を保存しました。";
     } else {
-      const newCard = {
+      cards.push({
         id: Date.now(),
         question,
         answer,
         explanation,
         wrong: false,
         image: pendingImage
-      };
-      cards.push(newCard);
+      });
+
       saveAll();
       mode = "all";
       shuffled = false;
@@ -325,7 +598,7 @@ function saveCard() {
     draw();
   } catch (error) {
     $("message").textContent =
-      "保存できませんでした。写真が大きすぎる可能性があります。別の写真か、写真なしで試してください。";
+      "保存できませんでした。写真が大きすぎる可能性があります。";
   }
 }
 
@@ -383,12 +656,13 @@ async function processImage(file) {
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
+
   const ctx = canvas.getContext("2d");
   ctx.drawImage(img, 0, 0, width, height);
 
   pendingImage = canvas.toDataURL("image/jpeg", 0.75);
   updatePreview();
-  $("message").textContent = "写真を取り込みました。最後に「保存」を押してください。";
+  $("message").textContent = "写真を取り込みました。最後に保存を押してください。";
 }
 
 function fileToDataURL(file) {
@@ -418,15 +692,15 @@ $("photoBox").addEventListener("paste", async event => {
   const items = [...(event.clipboardData?.items || [])];
   const imageItem = items.find(item => item.type.startsWith("image/"));
   if (!imageItem) return;
+
   event.preventDefault();
   const file = imageItem.getAsFile();
   if (file) await processImage(file);
 });
 
-$("photoBox").setAttribute("tabindex", "0");
-
 draw();
 </script>
+
 <script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
@@ -436,5 +710,6 @@ if ("serviceWorker" in navigator) {
   });
 }
 </script>
+
 </body>
 </html>
