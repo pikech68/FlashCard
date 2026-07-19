@@ -27,42 +27,59 @@ textarea{min-height:120px;resize:vertical}
 #preview{display:none;max-width:100%;max-height:320px;object-fit:contain;border-radius:8px;margin:10px auto}
 .hidden{display:none!important}
 .mode-label{font-size:13px;color:#666;margin-left:4px}
-@media(max-width:480px){body{padding:7px}.app{padding:12px}#question{font-size:27px}#answer{font-size:25px}button{font-size:13px;padding:7px 9px}}
+@media(max-width:480px){
+body{padding:7px}.app{padding:12px}
+#question{font-size:27px}
+#answer{font-size:25px}
+button{font-size:13px;padding:7px 9px}
+}
 </style>
 </head>
 <body>
 <main class="app">
 <h1>キャリコン単語帳</h1>
+
 <div class="toolbar">
 <button onclick="setMode('all')">通常</button>
 <button onclick="setMode('wrong')">✕だけ復習</button>
 <button onclick="shuffleCards()">ランダム</button>
 <span id="modeLabel" class="mode-label"></span>
 </div>
+
 <input id="search" type="text" placeholder="問題・答え・解説を検索" oninput="resetAndDraw()">
+
 <div id="counter"></div>
 <div id="question"></div>
 <img id="cardImage" alt="問題の写真">
+
 <div class="actions">
+<button onclick="previousQuestion()">← 前へ</button>
 <button onclick="showAnswer()">答え</button>
 <button onclick="toggleWrong()">間違えた</button>
-<button onclick="nextQuestion()">次へ</button>
+<button onclick="nextQuestion()">次へ →</button>
 <button onclick="startEdit()">編集</button>
 <button class="danger" onclick="deleteCurrent()">削除</button>
 </div>
+
 <div id="answer"></div>
+
 <section class="section">
 <h2 id="formTitle">問題を追加</h2>
+
 <textarea id="newQuestion" placeholder="問題を入力"></textarea>
 <input id="newAnswer" type="text" placeholder="正解">
 <textarea id="newExplanation" placeholder="解説"></textarea>
-<div class="photo-box" id="photoBox" tabindex="0">
+
+<div class="photo-box" id="photoBox">
 <strong>写真（任意）</strong>
 <div class="note">「写真を選ぶ」か、この枠内をクリックしてから画像を貼り付けられます。</div>
 <input id="photoInput" type="file" accept="image/*">
 <img id="preview" alt="写真のプレビュー">
-<div class="edit-actions"><button type="button" onclick="removePhoto()">写真を外す</button></div>
+<div class="edit-actions">
+<button type="button" onclick="removePhoto()">写真を外す</button>
 </div>
+</div>
+
 <div class="edit-actions">
 <button id="saveButton" class="primary" onclick="saveCard()">保存</button>
 <button id="cancelButton" class="hidden" onclick="cancelEdit()">編集をやめる</button>
@@ -70,34 +87,337 @@ textarea{min-height:120px;resize:vertical}
 <div id="message"></div>
 </section>
 </main>
+
 <script>
-const KEY="careerCardsV2";
-let cards=JSON.parse(localStorage.getItem(KEY)||"[]");
-if(cards.length===0){cards=[{id:Date.now(),question:"スーパーの理論について正しいものはどれか。\n\n① 職業興味を6類型に分類した\n② 自己概念の発達を重視した\n③ 計画的偶発性を提唱した\n④ 欲求階層説を提唱した",answer:"②",explanation:"スーパーは、自己概念の発達を重視したキャリア発達理論を提唱した。",wrong:false,image:""}];saveAll();}
-cards=cards.map(c=>({id:c.id||Date.now()+Math.random(),question:c.question||"",answer:c.answer||"",explanation:c.explanation||"",wrong:Boolean(c.wrong),image:c.image||""}));
-let current=0,mode="all",shuffled=false,order=[],editingId=null,pendingImage="";
-const $=id=>document.getElementById(id);
-function saveAll(){localStorage.setItem(KEY,JSON.stringify(cards))}
-function filtered(){const keyword=$("search").value.trim().toLowerCase();let result=cards.filter(card=>{const modeOK=mode==="all"||card.wrong;const text=`${card.question} ${card.answer} ${card.explanation}`.toLowerCase();return modeOK&&(keyword===""||text.includes(keyword));});if(shuffled)result=order.map(id=>result.find(card=>card.id===id)).filter(Boolean);return result;}
-function draw(){const list=filtered();$("answer").textContent="";$("modeLabel").textContent=mode==="wrong"?"✕だけ復習中":"";if(!list.length){$("counter").textContent="0問";$("question").textContent="該当する問題がありません。";$("cardImage").style.display="none";return;}if(current>=list.length)current=0;const card=list[current];$("counter").textContent=`${current+1} / ${list.length}問${card.wrong?"　✕登録済み":""}`;$("question").textContent=card.question;if(card.image){$("cardImage").src=card.image;$("cardImage").style.display="block";}else{$("cardImage").removeAttribute("src");$("cardImage").style.display="none";}}
-function showAnswer(){const list=filtered();if(!list.length)return;const card=list[current];$("answer").textContent=`【正解】\n${card.answer}\n\n【解説】\n${card.explanation||"解説なし"}`;}
-function nextQuestion(){const list=filtered();if(!list.length)return;current=(current+1)%list.length;draw();}
-function toggleWrong(){const list=filtered();if(!list.length)return;const original=cards.find(c=>c.id===list[current].id);if(!original)return;original.wrong=!original.wrong;saveAll();$("message").textContent=original.wrong?"「間違えた問題」に登録しました。":"「間違えた問題」から外しました。";if(mode==="wrong"&&!original.wrong)current=0;draw();}
-function setMode(newMode){mode=newMode;current=0;shuffled=false;order=[];draw();}
-function shuffleCards(){const list=filtered();order=list.map(c=>c.id);for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}shuffled=true;current=0;draw();}
-function resetAndDraw(){current=0;shuffled=false;order=[];draw();}
-function startEdit(){const list=filtered();if(!list.length)return;const card=list[current];editingId=card.id;$("formTitle").textContent="問題を編集";$("saveButton").textContent="変更を保存";$("cancelButton").classList.remove("hidden");$("newQuestion").value=card.question;$("newAnswer").value=card.answer;$("newExplanation").value=card.explanation;pendingImage=card.image||"";updatePreview();$("newQuestion").scrollIntoView({behavior:"smooth",block:"start"});$("newQuestion").focus();}
-function cancelEdit(){editingId=null;pendingImage="";$("formTitle").textContent="問題を追加";$("saveButton").textContent="保存";$("cancelButton").classList.add("hidden");clearForm();$("message").textContent="編集を取り消しました。";}
-function clearForm(){$("newQuestion").value="";$("newAnswer").value="";$("newExplanation").value="";$("photoInput").value="";pendingImage="";updatePreview();}
-function saveCard(){const question=$("newQuestion").value.trim(),answer=$("newAnswer").value.trim(),explanation=$("newExplanation").value.trim();if(!question||!answer){$("message").textContent="問題と正解を入力してください。";return;}try{if(editingId!==null){const card=cards.find(c=>c.id===editingId);if(!card)throw new Error();card.question=question;card.answer=answer;card.explanation=explanation;card.image=pendingImage;saveAll();editingId=null;$("formTitle").textContent="問題を追加";$("saveButton").textContent="保存";$("cancelButton").classList.add("hidden");$("message").textContent="変更を保存しました。";}else{cards.push({id:Date.now(),question,answer,explanation,wrong:false,image:pendingImage});saveAll();mode="all";shuffled=false;order=[];current=cards.length-1;$("message").textContent="保存しました。";}clearForm();draw();}catch(error){$("message").textContent="保存できませんでした。写真が大きすぎる可能性があります。別の写真か、写真なしで試してください。";}}
-function deleteCurrent(){const list=filtered();if(!list.length)return;const card=list[current];const preview=card.question.replace(/\s+/g," ").slice(0,35);if(!confirm(`この問題を削除しますか？\n\n${preview}${card.question.length>35?"…":""}`))return;cards=cards.filter(c=>c.id!==card.id);saveAll();if(editingId===card.id)cancelEdit();current=Math.max(0,current-1);$("message").textContent="問題を削除しました。";draw();}
-function updatePreview(){if(pendingImage){$("preview").src=pendingImage;$("preview").style.display="block";}else{$("preview").removeAttribute("src");$("preview").style.display="none";}}
-function removePhoto(){pendingImage="";$("photoInput").value="";updatePreview();$("message").textContent="写真を外しました。保存すると反映されます。";}
-async function processImage(file){if(!file||!file.type.startsWith("image/"))return;const dataUrl=await fileToDataURL(file);const img=await loadImage(dataUrl);const maxSide=1000;let width=img.width,height=img.height;if(Math.max(width,height)>maxSide){const scale=maxSide/Math.max(width,height);width=Math.round(width*scale);height=Math.round(height*scale);}const canvas=document.createElement("canvas");canvas.width=width;canvas.height=height;canvas.getContext("2d").drawImage(img,0,0,width,height);pendingImage=canvas.toDataURL("image/jpeg",0.75);updatePreview();$("message").textContent="写真を取り込みました。最後に「保存」を押してください。";}
-function fileToDataURL(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file);});}
-function loadImage(src){return new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src=src;});}
-$("photoInput").addEventListener("change",async event=>{const file=event.target.files&&event.target.files[0];if(file)await processImage(file);});
-$("photoBox").addEventListener("paste",async event=>{const items=[...(event.clipboardData?.items||[])];const imageItem=items.find(item=>item.type.startsWith("image/"));if(!imageItem)return;event.preventDefault();const file=imageItem.getAsFile();if(file)await processImage(file);});
+const KEY = "careerCardsV2";
+let cards = JSON.parse(localStorage.getItem(KEY) || "[]");
+
+if (cards.length === 0) {
+  cards = [{
+    id: Date.now(),
+    question: "スーパーの理論について正しいものはどれか。\\n\\n① 職業興味を6類型に分類した\\n② 自己概念の発達を重視した\\n③ 計画的偶発性を提唱した\\n④ 欲求階層説を提唱した",
+    answer: "②",
+    explanation: "スーパーは、自己概念の発達を重視したキャリア発達理論を提唱した。",
+    wrong: false,
+    image: ""
+  }];
+  saveAll();
+}
+
+cards = cards.map(c => ({
+  id: c.id || Date.now() + Math.random(),
+  question: c.question || "",
+  answer: c.answer || "",
+  explanation: c.explanation || "",
+  wrong: Boolean(c.wrong),
+  image: c.image || ""
+}));
+
+let current = 0;
+let mode = "all";
+let shuffled = false;
+let order = [];
+let editingId = null;
+let pendingImage = "";
+
+const $ = id => document.getElementById(id);
+
+function saveAll() {
+  localStorage.setItem(KEY, JSON.stringify(cards));
+}
+
+function filtered() {
+  const keyword = $("search").value.trim().toLowerCase();
+
+  let result = cards.filter(card => {
+    const modeOK = mode === "all" || card.wrong;
+    const text = `${card.question} ${card.answer} ${card.explanation}`.toLowerCase();
+    return modeOK && (keyword === "" || text.includes(keyword));
+  });
+
+  if (shuffled) {
+    result = order.map(id => result.find(card => card.id === id)).filter(Boolean);
+  }
+  return result;
+}
+
+function draw() {
+  const list = filtered();
+  $("answer").textContent = "";
+  $("modeLabel").textContent = mode === "wrong" ? "✕だけ復習中" : "";
+
+  if (!list.length) {
+    $("counter").textContent = "0問";
+    $("question").textContent = "該当する問題がありません。";
+    $("cardImage").style.display = "none";
+    return;
+  }
+
+  if (current >= list.length) current = 0;
+  const card = list[current];
+
+  $("counter").textContent = `${current + 1} / ${list.length}問${card.wrong ? "　✕登録済み" : ""}`;
+  $("question").textContent = card.question;
+
+  if (card.image) {
+    $("cardImage").src = card.image;
+    $("cardImage").style.display = "block";
+  } else {
+    $("cardImage").removeAttribute("src");
+    $("cardImage").style.display = "none";
+  }
+}
+
+function showAnswer() {
+  const list = filtered();
+  if (!list.length) return;
+  const card = list[current];
+  $("answer").textContent = `【正解】\n${card.answer}\n\n【解説】\n${card.explanation || "解説なし"}`;
+}
+
+function previousQuestion() {
+  const list = filtered();
+  if (!list.length) return;
+  current = (current - 1 + list.length) % list.length;
+  draw();
+}
+
+function nextQuestion() {
+  const list = filtered();
+  if (!list.length) return;
+  current = (current + 1) % list.length;
+  draw();
+}
+
+function toggleWrong() {
+  const list = filtered();
+  if (!list.length) return;
+  const original = cards.find(c => c.id === list[current].id);
+  if (!original) return;
+
+  original.wrong = !original.wrong;
+  saveAll();
+  $("message").textContent = original.wrong
+    ? "「間違えた問題」に登録しました。"
+    : "「間違えた問題」から外しました。";
+
+  if (mode === "wrong" && !original.wrong) current = 0;
+  draw();
+}
+
+function setMode(newMode) {
+  mode = newMode;
+  current = 0;
+  shuffled = false;
+  order = [];
+  draw();
+}
+
+function shuffleCards() {
+  const list = filtered();
+  order = list.map(c => c.id);
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  shuffled = true;
+  current = 0;
+  draw();
+}
+
+function resetAndDraw() {
+  current = 0;
+  shuffled = false;
+  order = [];
+  draw();
+}
+
+function startEdit() {
+  const list = filtered();
+  if (!list.length) return;
+  const card = list[current];
+
+  editingId = card.id;
+  $("formTitle").textContent = "問題を編集";
+  $("saveButton").textContent = "変更を保存";
+  $("cancelButton").classList.remove("hidden");
+  $("newQuestion").value = card.question;
+  $("newAnswer").value = card.answer;
+  $("newExplanation").value = card.explanation;
+  pendingImage = card.image || "";
+  updatePreview();
+
+  $("newQuestion").scrollIntoView({ behavior: "smooth", block: "start" });
+  $("newQuestion").focus();
+}
+
+function cancelEdit() {
+  editingId = null;
+  pendingImage = "";
+  $("formTitle").textContent = "問題を追加";
+  $("saveButton").textContent = "保存";
+  $("cancelButton").classList.add("hidden");
+  clearForm();
+  $("message").textContent = "編集を取り消しました。";
+}
+
+function clearForm() {
+  $("newQuestion").value = "";
+  $("newAnswer").value = "";
+  $("newExplanation").value = "";
+  $("photoInput").value = "";
+  pendingImage = "";
+  updatePreview();
+}
+
+function saveCard() {
+  const question = $("newQuestion").value.trim();
+  const answer = $("newAnswer").value.trim();
+  const explanation = $("newExplanation").value.trim();
+
+  if (!question || !answer) {
+    $("message").textContent = "問題と正解を入力してください。";
+    return;
+  }
+
+  try {
+    if (editingId !== null) {
+      const card = cards.find(c => c.id === editingId);
+      if (!card) throw new Error("編集する問題が見つかりません。");
+
+      card.question = question;
+      card.answer = answer;
+      card.explanation = explanation;
+      card.image = pendingImage;
+      saveAll();
+
+      editingId = null;
+      $("formTitle").textContent = "問題を追加";
+      $("saveButton").textContent = "保存";
+      $("cancelButton").classList.add("hidden");
+      $("message").textContent = "変更を保存しました。";
+    } else {
+      const newCard = {
+        id: Date.now(),
+        question,
+        answer,
+        explanation,
+        wrong: false,
+        image: pendingImage
+      };
+      cards.push(newCard);
+      saveAll();
+      mode = "all";
+      shuffled = false;
+      order = [];
+      current = cards.length - 1;
+      $("message").textContent = "保存しました。";
+    }
+
+    clearForm();
+    draw();
+  } catch (error) {
+    $("message").textContent =
+      "保存できませんでした。写真が大きすぎる可能性があります。別の写真か、写真なしで試してください。";
+  }
+}
+
+function deleteCurrent() {
+  const list = filtered();
+  if (!list.length) return;
+  const card = list[current];
+
+  const preview = card.question.replace(/\s+/g, " ").slice(0, 35);
+  const ok = confirm(`この問題を削除しますか？\n\n${preview}${card.question.length > 35 ? "…" : ""}`);
+  if (!ok) return;
+
+  cards = cards.filter(c => c.id !== card.id);
+  saveAll();
+
+  if (editingId === card.id) cancelEdit();
+  current = Math.max(0, current - 1);
+  $("message").textContent = "問題を削除しました。";
+  draw();
+}
+
+function updatePreview() {
+  if (pendingImage) {
+    $("preview").src = pendingImage;
+    $("preview").style.display = "block";
+  } else {
+    $("preview").removeAttribute("src");
+    $("preview").style.display = "none";
+  }
+}
+
+function removePhoto() {
+  pendingImage = "";
+  $("photoInput").value = "";
+  updatePreview();
+  $("message").textContent = "写真を外しました。保存すると反映されます。";
+}
+
+async function processImage(file) {
+  if (!file || !file.type.startsWith("image/")) return;
+
+  const dataUrl = await fileToDataURL(file);
+  const img = await loadImage(dataUrl);
+
+  const maxSide = 1000;
+  let width = img.width;
+  let height = img.height;
+
+  if (Math.max(width, height) > maxSide) {
+    const scale = maxSide / Math.max(width, height);
+    width = Math.round(width * scale);
+    height = Math.round(height * scale);
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(img, 0, 0, width, height);
+
+  pendingImage = canvas.toDataURL("image/jpeg", 0.75);
+  updatePreview();
+  $("message").textContent = "写真を取り込みました。最後に「保存」を押してください。";
+}
+
+function fileToDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+$("photoInput").addEventListener("change", async event => {
+  const file = event.target.files && event.target.files[0];
+  if (file) await processImage(file);
+});
+
+$("photoBox").addEventListener("paste", async event => {
+  const items = [...(event.clipboardData?.items || [])];
+  const imageItem = items.find(item => item.type.startsWith("image/"));
+  if (!imageItem) return;
+  event.preventDefault();
+  const file = imageItem.getAsFile();
+  if (file) await processImage(file);
+});
+
+$("photoBox").setAttribute("tabindex", "0");
+
 draw();
 </script>
 </body>
