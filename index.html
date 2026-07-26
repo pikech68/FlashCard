@@ -106,6 +106,19 @@ h1{
   gap:6px;
 }
 
+.list-row{
+  display:flex;
+  justify-content:flex-end;
+  margin-top:7px;
+}
+
+.list-button{
+  padding:8px 12px;
+  font-size:13px;
+  box-shadow:none;
+  background:#fbfbfd;
+}
+
 button{
   border:1px solid var(--line);
   border-radius:12px;
@@ -295,6 +308,69 @@ button.danger{
   border:1px solid #eee5d9;
 }
 
+.list-panel{
+  margin-top:14px;
+  padding:14px;
+}
+
+.list-panel-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.list-title{
+  font-size:18px;
+  font-weight:780;
+}
+
+.list-count{
+  display:inline-block;
+  margin-top:4px;
+}
+
+.question-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.question-list-item{
+  width:100%;
+  text-align:left;
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:start;
+  gap:10px;
+  padding:11px 12px;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:13px;
+  box-shadow:none;
+}
+
+.question-list-item .num{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:750;
+  min-width:26px;
+}
+
+.question-list-item .qtext{
+  font-size:14px;
+  line-height:1.45;
+  font-weight:650;
+  overflow-wrap:anywhere;
+}
+
+.question-list-item .flag{
+  color:var(--danger);
+  font-size:12px;
+  font-weight:800;
+}
+
 .add-wrap{
   margin-top:14px;
   overflow:hidden;
@@ -424,6 +500,9 @@ textarea{
       <button id="wrongModeButton" onclick="setMode('wrong')">✕だけ復習</button>
       <button onclick="shuffleCards()">ランダム</button>
     </div>
+    <div class="list-row">
+      <button class="list-button" onclick="openQuestionList()">問題一覧</button>
+    </div>
     <input id="search" type="text" placeholder="問題・答え・解説を検索" oninput="resetAndDraw()">
   </section>
 
@@ -458,6 +537,17 @@ textarea{
       <div class="image-label">参考画像</div>
       <img id="cardImage" alt="解説の参考画像">
     </div>
+  </section>
+
+  <section id="listPanel" class="panel list-panel hidden">
+    <div class="list-panel-head">
+      <div>
+        <div class="list-title">問題一覧</div>
+        <div id="listCount" class="small-note list-count"></div>
+      </div>
+      <button onclick="closeQuestionList()">閉じる</button>
+    </div>
+    <div id="questionList" class="question-list"></div>
   </section>
 
   <details id="editorPanel" class="panel add-wrap">
@@ -729,6 +819,72 @@ function resetAndDraw() {
   order = [];
   restored = true;
   draw();
+}
+
+
+function openQuestionList() {
+  const list = cards;
+  const panel = $("listPanel");
+  const container = $("questionList");
+
+  container.innerHTML = "";
+  $("listCount").textContent = `${list.length}問`;
+
+  if (!list.length) {
+    const empty = document.createElement("div");
+    empty.className = "small-note";
+    empty.textContent = "問題がまだありません。";
+    container.appendChild(empty);
+  } else {
+    list.forEach((card, index) => {
+      const btn = document.createElement("button");
+      btn.className = "question-list-item";
+
+      const num = document.createElement("span");
+      num.className = "num";
+      num.textContent = `${index + 1}`;
+
+      const q = document.createElement("span");
+      q.className = "qtext";
+      q.textContent = card.question.replace(/\s+/g, " ").trim();
+
+      const flag = document.createElement("span");
+      flag.className = "flag";
+      flag.textContent = card.wrong ? "✕" : "";
+
+      btn.appendChild(num);
+      btn.appendChild(q);
+      btn.appendChild(flag);
+
+      btn.addEventListener("click", () => jumpToCard(card.id));
+      container.appendChild(btn);
+    });
+  }
+
+  panel.classList.remove("hidden");
+  panel.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function closeQuestionList() {
+  $("listPanel").classList.add("hidden");
+}
+
+function jumpToCard(cardId) {
+  mode = "all";
+  shuffled = false;
+  order = [];
+  $("search").value = "";
+
+  const idx = cards.findIndex(card => card.id === cardId);
+  if (idx >= 0) {
+    current = idx;
+    restored = true;
+    saveState(cardId);
+    draw();
+  }
+
+  closeQuestionList();
+  document.querySelector(".study-card").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function startEdit() {
