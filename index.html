@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#eaf0ff">
+<meta name="theme-color" content="#f2f3fb">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="キャリコン単語帳">
@@ -14,23 +14,29 @@
 
 <style>
 :root{
-  --bg:#f5f7fb;
-  --card:#ffffff;
-  --text:#20242c;
-  --sub:#687080;
-  --line:#dfe4ee;
-  --primary:#365ea8;
-  --primary-soft:#eaf0ff;
-  --danger:#b33a3a;
-  --danger-soft:#fff0f0;
-  --shadow:0 8px 24px rgba(25,42,70,.08);
+  --bg:#f6f7fb;
+  --surface:#ffffff;
+  --surface-soft:#fafbff;
+  --text:#1f2430;
+  --muted:#7b8290;
+  --line:#e4e7ee;
+  --accent:#5964d9;
+  --accent-deep:#4752c8;
+  --accent-soft:#eef0ff;
+  --danger:#c95757;
+  --danger-soft:#fff4f4;
+  --success:#4f9a7b;
+  --shadow:0 10px 28px rgba(44,52,78,.07);
+  --shadow-soft:0 3px 12px rgba(44,52,78,.055);
 }
 
 *{box-sizing:border-box}
-
+html{-webkit-tap-highlight-color:transparent}
 body{
   margin:0;
-  background:var(--bg);
+  background:
+    radial-gradient(circle at top left, rgba(112,121,232,.08), transparent 28%),
+    var(--bg);
   color:var(--text);
   font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP",sans-serif;
 }
@@ -38,104 +44,128 @@ body{
 .app{
   width:min(100%,880px);
   margin:0 auto;
-  padding:14px 12px 40px;
+  padding:12px 10px 36px;
 }
 
 .topbar{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:10px;
-  margin-bottom:12px;
+  gap:12px;
+  padding:4px 4px 10px;
 }
 
 h1{
   margin:0;
-  font-size:23px;
-  letter-spacing:.02em;
+  font-size:22px;
+  letter-spacing:.01em;
   display:flex;
   align-items:center;
-  gap:9px;
+  gap:10px;
+  font-weight:780;
 }
+
 .brand-mark{
   display:inline-grid;
   place-items:center;
-  width:32px;
-  height:32px;
-  border-radius:10px;
+  width:34px;
+  height:34px;
+  border-radius:11px;
   color:#fff;
-  background:linear-gradient(145deg,#5b65d8,#7f69df);
-  font-size:17px;
+  background:linear-gradient(145deg,#6873e5,#8a72e1);
+  font-size:16px;
   font-weight:800;
-  box-shadow:0 4px 10px rgba(91,101,216,.24);
+  box-shadow:0 6px 16px rgba(92,103,215,.25);
 }
 
 .small-note{
-  color:var(--sub);
-  font-size:13px;
+  color:var(--muted);
+  font-size:12px;
+  background:rgba(255,255,255,.65);
+  border:1px solid rgba(225,228,238,.8);
+  padding:5px 8px;
+  border-radius:999px;
 }
 
 .panel{
-  background:var(--card);
-  border:1px solid var(--line);
-  border-radius:18px;
+  background:rgba(255,255,255,.92);
+  border:1px solid rgba(225,228,238,.92);
+  border-radius:20px;
   box-shadow:var(--shadow);
+  backdrop-filter:blur(8px);
 }
 
 .controls{
-  padding:12px;
+  padding:10px;
   margin-bottom:12px;
 }
 
 .mode-row{
   display:grid;
   grid-template-columns:repeat(3,1fr);
-  gap:7px;
+  gap:6px;
 }
 
 button{
   border:1px solid var(--line);
-  border-radius:10px;
+  border-radius:12px;
   background:#fff;
   color:var(--text);
   font-size:14px;
-  padding:9px 10px;
+  font-weight:600;
+  padding:10px 10px;
   cursor:pointer;
+  box-shadow:var(--shadow-soft);
+  transition:transform .08s ease, box-shadow .12s ease, background .12s ease;
 }
 
-button:active{transform:translateY(1px)}
+button:active{
+  transform:scale(.985);
+  box-shadow:none;
+}
 
 button.primary{
-  background:var(--primary);
+  background:linear-gradient(180deg,var(--accent),var(--accent-deep));
   color:#fff;
-  border-color:var(--primary);
-  font-weight:700;
+  border-color:transparent;
+  font-weight:750;
+  box-shadow:0 8px 18px rgba(71,82,200,.22);
 }
 
 button.soft{
-  background:var(--primary-soft);
-  color:var(--primary);
-  border-color:#cbd8f3;
+  background:var(--accent-soft);
+  color:var(--accent-deep);
+  border-color:#d8dcff;
+  box-shadow:none;
 }
 
 button.danger{
   color:var(--danger);
   background:var(--danger-soft);
-  border-color:#efcaca;
+  border-color:#f3d6d6;
+  box-shadow:none;
 }
 
 #search{
   width:100%;
-  margin-top:9px;
-  padding:11px 12px;
+  margin-top:8px;
+  padding:11px 13px;
   border:1px solid var(--line);
-  border-radius:10px;
+  border-radius:13px;
+  background:var(--surface-soft);
+  color:var(--text);
+  font-size:15px;
+  outline:none;
+}
+
+#search:focus{
+  border-color:#c7ccf9;
   background:#fff;
-  font-size:16px;
+  box-shadow:0 0 0 3px rgba(89,100,217,.08);
 }
 
 .study-card{
-  padding:17px 16px 15px;
+  padding:16px 15px 14px;
 }
 
 .card-head{
@@ -143,49 +173,46 @@ button.danger{
   align-items:center;
   justify-content:space-between;
   gap:10px;
-  margin-bottom:12px;
+  margin-bottom:7px;
 }
 
 #counter{
-  color:var(--sub);
-  font-size:14px;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:650;
 }
 
 .status{
-  font-size:13px;
-  color:var(--primary);
-  font-weight:700;
+  font-size:12px;
+  color:var(--danger);
+  font-weight:750;
+  background:var(--danger-soft);
+  padding:4px 7px;
+  border-radius:999px;
 }
 
 #question{
   white-space:pre-wrap;
-  font-size:25px;
-  line-height:1.65;
-  font-weight:650;
-  min-height:150px;
-  padding:8px 2px 4px;
-}
-
-#cardImage{
-  width:100%;
-  max-height:470px;
-  object-fit:contain;
-  margin:10px 0 2px;
-  border-radius:12px;
-  background:#f8f9fc;
-  border:1px solid var(--line);
+  font-size:24px;
+  line-height:1.62;
+  font-weight:700;
+  min-height:185px;
+  padding:24px 4px 18px;
+  display:flex;
+  align-items:flex-start;
+  letter-spacing:.005em;
 }
 
 .main-actions{
   display:grid;
-  grid-template-columns:1fr 1.25fr 1fr;
+  grid-template-columns:.9fr 1.35fr .9fr;
   gap:8px;
-  margin-top:10px;
+  margin-top:3px;
 }
 
 .main-actions button{
-  padding:11px 8px;
-  font-size:15px;
+  padding:11px 7px;
+  font-size:14px;
 }
 
 .secondary-actions{
@@ -193,30 +220,92 @@ button.danger{
   justify-content:center;
   flex-wrap:wrap;
   gap:7px;
-  margin-top:10px;
+  margin-top:9px;
+}
+
+.secondary-actions button{
+  min-width:82px;
+  padding:8px 10px;
+  font-size:13px;
+  box-shadow:none;
+  background:#fbfbfd;
+}
+
+.reorder-actions{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:8px;
+  padding-top:8px;
+  border-top:1px dashed var(--line);
+}
+
+.reorder-label{
+  width:100%;
+  text-align:center;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:650;
+}
+
+.reorder-actions button{
+  padding:7px 10px;
+  font-size:12px;
+  color:#59606d;
+  background:#fff;
+  box-shadow:none;
 }
 
 #answer{
   white-space:pre-wrap;
-  font-size:23px;
-  line-height:1.65;
+  font-size:21px;
+  line-height:1.68;
   margin-top:16px;
-  padding:16px 14px;
-  border-radius:12px;
-  background:#f7f9fd;
+  padding:17px 15px;
+  border-radius:15px;
+  background:linear-gradient(180deg,#fafbff,#f7f8fd);
   border:1px solid var(--line);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8);
+}
+
+.image-section{
+  margin-top:12px;
+  padding:13px;
+  border-radius:15px;
+  background:#fffaf4;
+  border:1px solid #f0dfca;
+}
+
+.image-label{
+  font-size:13px;
+  font-weight:750;
+  color:#89653a;
+  margin-bottom:7px;
+}
+
+#cardImage{
+  width:100%;
+  max-height:470px;
+  object-fit:contain;
+  margin:0;
+  border-radius:12px;
+  background:#fff;
+  border:1px solid #eee5d9;
 }
 
 .add-wrap{
   margin-top:14px;
+  overflow:hidden;
 }
 
 summary{
   list-style:none;
   cursor:pointer;
-  padding:14px 16px;
-  font-weight:700;
-  font-size:17px;
+  padding:15px 16px;
+  font-weight:760;
+  font-size:16px;
 }
 
 summary::-webkit-details-marker{display:none}
@@ -224,7 +313,10 @@ summary::-webkit-details-marker{display:none}
 summary::after{
   content:"＋";
   float:right;
-  color:var(--primary);
+  color:var(--accent);
+  font-size:20px;
+  line-height:1;
+  font-weight:500;
 }
 
 details[open] summary::after{content:"－"}
@@ -238,28 +330,37 @@ textarea,
 input[type="text"]{
   width:100%;
   margin:7px 0;
-  padding:12px;
+  padding:12px 13px;
   border:1px solid var(--line);
-  border-radius:10px;
-  font-size:17px;
-  line-height:1.5;
+  border-radius:12px;
+  font-size:16px;
+  line-height:1.55;
   background:#fff;
+  color:var(--text);
+  outline:none;
+}
+
+textarea:focus,
+input[type="text"]:focus{
+  border-color:#c7ccf9;
+  box-shadow:0 0 0 3px rgba(89,100,217,.08);
 }
 
 textarea{
-  min-height:112px;
+  min-height:116px;
   resize:vertical;
 }
+
 .answer-input{
-  min-height:145px;
+  min-height:150px;
 }
 
 .photo-box{
-  border:1px dashed #bfc8d8;
-  border-radius:12px;
+  border:1px dashed #c9ceda;
+  border-radius:13px;
   padding:12px;
   margin:10px 0;
-  background:#fafbfe;
+  background:#fbfcff;
 }
 
 #preview{
@@ -281,39 +382,30 @@ textarea{
 #message{
   min-height:22px;
   margin-top:9px;
-  font-size:14px;
-  color:#256029;
+  font-size:13px;
+  color:#39795f;
 }
 
-.image-section{
-  margin-top:12px;
-  padding:13px;
-  border-radius:12px;
-  background:#fffaf3;
-  border:1px solid #f0dfc4;
-}
-.image-label{
-  font-size:14px;
-  font-weight:700;
-  color:#8a6737;
-  margin-bottom:6px;
-}
 .hidden{display:none!important}
 
 @media(max-width:520px){
-  .app{padding:8px 8px 28px}
-  .topbar{padding:4px 3px}
-  h1{font-size:21px}
-  .controls{padding:10px}
-  .study-card{padding:14px 13px}
+  .app{padding:7px 7px 26px}
+  .topbar{padding:5px 3px 9px}
+  h1{font-size:20px}
+  .brand-mark{width:32px;height:32px}
+  .small-note{font-size:11px}
+  .controls{padding:9px}
+  .study-card{padding:14px 12px 13px}
   #question{
-    font-size:23px;
-    line-height:1.62;
-    min-height:140px;
+    font-size:22px;
+    line-height:1.6;
+    min-height:205px;
+    padding:26px 3px 20px;
   }
-  #answer{font-size:21px}
-  button{font-size:13px;padding:8px 8px}
-  .main-actions button{font-size:14px;padding:10px 6px}
+  #answer{font-size:20px}
+  button{font-size:13px;padding:9px 8px}
+  .main-actions button{font-size:13px;padding:10px 5px}
+  .secondary-actions button{min-width:76px}
 }
 </style>
 </head>
@@ -353,6 +445,12 @@ textarea{
       <button id="wrongButton" class="soft" onclick="toggleWrong()">間違えた</button>
       <button onclick="startEdit()">編集</button>
       <button class="danger" onclick="deleteCurrent()">削除</button>
+    </div>
+
+    <div class="reorder-actions">
+      <span class="reorder-label">順番を変更</span>
+      <button onclick="moveCurrent(-1)">↑ 前に移動</button>
+      <button onclick="moveCurrent(1)">↓ 後ろに移動</button>
     </div>
 
     <div id="answer" class="hidden"></div>
@@ -558,6 +656,45 @@ function toggleWrong() {
     : "「間違えた問題」から外しました。";
 
   if (mode === "wrong" && !original.wrong) current = 0;
+  draw();
+}
+
+
+function moveCurrent(direction) {
+  if (mode !== "all" || shuffled || $("search").value.trim() !== "") {
+    $("message").textContent = "順番の変更は「通常」モードで、検索やランダムを解除してから行ってください。";
+    return;
+  }
+
+  if (!cards.length) return;
+
+  const card = cards[current];
+  const originalIndex = cards.findIndex(c => c.id === card.id);
+  if (originalIndex < 0) return;
+
+  const targetIndex = originalIndex + direction;
+
+  if (targetIndex < 0) {
+    $("message").textContent = "この問題はすでに先頭です。";
+    return;
+  }
+
+  if (targetIndex >= cards.length) {
+    $("message").textContent = "この問題はすでに最後です。";
+    return;
+  }
+
+  [cards[originalIndex], cards[targetIndex]] = [cards[targetIndex], cards[originalIndex]];
+  saveAll();
+
+  current = targetIndex;
+  restored = true;
+  saveState(cards[current].id);
+
+  $("message").textContent = direction < 0
+    ? "問題を1つ前に移動しました。"
+    : "問題を1つ後ろに移動しました。";
+
   draw();
 }
 

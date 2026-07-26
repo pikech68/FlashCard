@@ -1,4 +1,4 @@
-const CACHE_NAME = "career-flashcard-v7";
+const CACHE_NAME = "career-flashcard-v9";
 const APP_FILES = [
   "./",
   "./index.html",
