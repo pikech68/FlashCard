@@ -4,8 +4,8 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f5f7fb",
-  "theme_color": "#eaf0ff",
+  "background_color": "#f7f7fb",
+  "theme_color": "#f0efff",
   "description": "キャリアコンサルタント試験のための自分専用単語帳",
   "icons": [
     {
