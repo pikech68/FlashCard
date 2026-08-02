@@ -6,7 +6,7 @@
   "display": "standalone",
   "background_color": "#f6f7fb",
   "theme_color": "#f2f3fb",
-  "description": "キャリアコンサルタント試験のための自分専用単語帳",
+  "description": "キャリアコンサルタント試験のための同期対応単語帳",
   "icons": [
     {
       "src": "./icon-192.png",
